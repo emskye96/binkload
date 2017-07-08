@@ -1,0 +1,29 @@
+#!/bin/bash
+# binkload ~ Emma N. Skye <emma@skyenet.org>
+# This assumes the prescence of the ~/.steam symlink.
+csgo_bin64=$(realpath ~/.steam/steam/steamapps/common/Counter-Strike\ Global\ Offensive/bin/linux64)
+
+# Print usage when no arguments are specified.
+if [ $# -eq 0 ]; then
+	echo "usage: $0 [input.so]"
+	exit 1
+fi
+
+# Check for the existence of the input library.
+if [ ! -f $1 ]; then
+	echo "error: input library does not exist."
+	exit 1
+fi
+
+# Ensure the original 'binkalnx64.asi' exists in the current directory.
+if [ ! -f './binkalnx64.asi.backup' ]; then
+	cp -v "${csgo_bin64}/binkalnx64.asi" "./binkalnx64.asi.backup"
+fi
+
+# Compile and output directly into the game folder.
+echo "void _init(){dlopen(L,1);}" |
+	gcc -shared -fPIC -s -O3 -nostdlib -DL=\"$1\" -include dlfcn.h -o "${csgo_bin64}/binkalnx64.asi" -xc -
+
+if [ $? -eq 0 ]; then
+    echo "OK!"
+fi
